@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tawana CRM | Intelligent Capacity-Driven CRM</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+            },
+            accent: {
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.4);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.15);
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-900/90 border-r border-slate-800 flex flex-col justify-between shrink-0 select-none">
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-16 flex items-center px-6 border-b border-slate-800/80 gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-teal-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">Tawana<span class="text-teal-400"> CRM</span></span>
+          <span class="text-[10px] block font-mono text-teal-400/90 uppercase tracking-widest -mt-1 font-semibold">Capacity Engine</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-3 space-y-1 text-sm font-medium">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+          Executive Dashboard
+        </button>
+
+        <button onclick="switchTab('capacity')" id="nav-capacity" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            <span>Rep Capacity Planner</span>
+          </div>
+          <span id="badge-overloaded-count" class="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">2 Alert</span>
+        </button>
+
+        <button onclick="switchTab('deals')" id="nav-deals" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          Deals & Pipeline Kanban
+        </button>
+
+        <button onclick="switchTab('accounts')" id="nav-accounts" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            <span>Accounts & Quotas</span>
+          </div>
+          <span id="badge-account-quota" class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Quota</span>
+        </button>
+
+        <button onclick="switchTab('infrastructure')" id="nav-infrastructure" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
+          System Sizer & Stress Lab
+        </button>
+
+        <button onclick="switchTab('alerts')" id="nav-alerts" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <span>Capacity Alerts</span>
+          </div>
+          <span id="alerts-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold">5</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Capacity Engine Status Box in Sidebar -->
+    <div class="p-4 m-3 rounded-xl bg-slate-800/50 border border-slate-700/60 text-xs">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-slate-400 font-medium">Workload Balancer</span>
+        <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Active
+        </span>
+      </div>
+      <div class="text-slate-300 text-[11px] mb-2 leading-relaxed">
+        Autonomous rep bandwidth protection & queue throttling enabled.
+      </div>
+      <button onclick="triggerQuickRebalance()" class="w-full py-1.5 px-2 bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-400 hover:to-indigo-500 text-white rounded font-medium text-[11px] flex items-center justify-center gap-1.5 shadow">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        Rebalance Capacity
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
+    <!-- Top Header -->
+    <header class="h-16 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-900/40">
+      <div class="flex items-center gap-4">
+        <h1 id="page-title" class="text-xl font-bold text-white tracking-tight">Executive Dashboard</h1>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20 font-medium">Capacity-Aware Routing v2.0</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="openNewDealModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+          Add Deal
+        </button>
+        <button onclick="openNewAccountModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" /></svg>
+          New Account
+        </button>
+        <button onclick="fetchFreshData()" title="Refresh Data" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Workspace -->
+    <div id="content-container" class="flex-1 overflow-y-auto p-8 space-y-8">
+
+      <!-- ================= 1. EXECUTIVE DASHBOARD ================= -->
+      <section id="tab-dashboard" class="space-y-8">
+        <!-- Top Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- Total Pipeline -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-indigo-500">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+              <span>ACTIVE PIPELINE</span>
+              <span class="text-indigo-400 font-mono text-[11px] bg-indigo-500/10 px-2 py-0.5 rounded">Unweighted</span>
+            </div>
+            <div id="kpi-total-pipeline" class="text-2xl font-bold text-white mt-2">$0</div>
+            <div class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+              <span id="kpi-active-deals-count" class="text-indigo-300 font-medium">0 active deals</span> in pipeline
+            </div>
+          </div>
+
+          <!-- Weighted Pipeline -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-teal-500">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+              <span>WEIGHTED FORECAST</span>
+              <span class="text-teal-400 font-mono text-[11px] bg-teal-500/10 px-2 py-0.5 rounded">Probability Adjusted</span>
+            </div>
+            <div id="kpi-weighted-pipeline" class="text-2xl font-bold text-teal-300 mt-2">$0</div>
+            <div class="text-xs text-slate-400 mt-1">Expected close revenue</div>
+          </div>
+
+          <!-- Rep Capacity Utilization -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-rose-500">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+              <span>REP WORKLOAD CAPACITY</span>
+              <span id="kpi-rep-status-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">Overloaded</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="kpi-avg-utilization" class="text-2xl font-bold text-white">0%</span>
+              <span class="text-xs text-slate-400">team average</span>
+            </div>
+            <div class="text-xs text-rose-300 mt-1 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <span id="kpi-overloaded-reps-text">2 reps over capacity limit</span>
+            </div>
+          </div>
+
+          <!-- Account MRR & Capacity -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-amber-500">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+              <span>TOTAL MRR</span>
+              <span class="text-amber-400 font-mono text-[11px] bg-amber-500/10 px-2 py-0.5 rounded">SaaS Base</span>
+            </div>
+            <div id="kpi-total-mrr" class="text-2xl font-bold text-white mt-2">$0</div>
+            <div class="text-xs text-amber-300 mt-1 flex items-center gap-1">
+              <span id="kpi-accounts-near-cap" class="font-semibold">0</span> accounts near capacity (&gt;85% quota)
+            </div>
+          </div>
+        </div>
+
+        <!-- Over-Capacity Warning Banner -->
+        <div id="rebalance-callout" class="p-5 rounded-2xl bg-gradient-to-r from-rose-950/60 via-slate-900 to-indigo-950/50 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <div class="p-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            </div>
+            <div>
+              <h3 class="text-white font-semibold text-sm">Capacity Headroom Imbalance Detected</h3>
+              <p class="text-slate-300 text-xs mt-0.5">
+                Certain senior account executives are currently operating above safe capacity limits (>90%), risking lead fatigue. Other reps hold excess bandwidth.
+              </p>
+            </div>
+          </div>
+          <button onclick="triggerQuickRebalance()" class="shrink-0 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/20 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Execute Auto-Rebalance
+          </button>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Workload Capacity Chart -->
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-semibold text-white">Sales Rep Bandwidth & Capacity Load</h3>
+                <p class="text-xs text-slate-400">Current assigned effort points vs ceiling limit</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md font-mono">Effort Points</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chart-rep-capacity"></canvas>
+            </div>
+          </div>
+
+          <!-- Pipeline Stages Chart -->
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-semibold text-white">Pipeline Value by Stage</h3>
+                <p class="text-xs text-slate-400">Weighted conversion velocity distribution</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md font-mono">Stage Value ($)</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chart-pipeline-stages"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white">Real-Time System & Allocation Activity</h3>
+            <span class="text-xs text-slate-400">Live transaction stream</span>
+          </div>
+          <div id="activity-feed-list" class="space-y-3">
+            <!-- Dynamic feed items -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. REP CAPACITY PLANNER ================= -->
+      <section id="tab-capacity" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Sales Rep Workload & Bandwidth Planner</h2>
+            <p class="text-xs text-slate-400">Monitor individual representative effort units, quota pacing, and capacity limits.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="triggerQuickRebalance()" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-teal-600/20 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              Run Intelligent Rebalance
+            </button>
+          </div>
+        </div>
+
+        <!-- Rebalance Result Alert Container -->
+        <div id="rebalance-result-box" class="hidden p-4 rounded-xl bg-teal-950/60 border border-teal-500/40 text-teal-200 text-xs">
+          <!-- Filled dynamically -->
+        </div>
+
+        <!-- Reps Capacity Heatmap Cards -->
+        <div id="reps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Dynamically populated reps -->
+        </div>
+      </section>
+
+      <!-- ================= 3. DEALS & PIPELINE KANBAN ================= -->
+      <section id="tab-deals" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Deals & Opportunities Pipeline</h2>
+            <p class="text-xs text-slate-400">Each deal has an assigned Effort/Complexity Score (1-5 pts) to protect team capacity.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="openNewDealModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              New Opportunity
+            </button>
+          </div>
+        </div>
+
+        <!-- Kanban Board Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-4">
+          <!-- Column: Lead -->
+          <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col min-w-[240px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                <span class="text-xs font-bold text-slate-200">Lead</span>
+              </div>
+              <span id="count-stage-lead" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">0</span>
+            </div>
+            <div id="col-stage-lead" class="space-y-3 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Qualified -->
+          <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col min-w-[240px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+                <span class="text-xs font-bold text-slate-200">Qualified</span>
+              </div>
+              <span id="count-stage-qualified" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-indigo-400">0</span>
+            </div>
+            <div id="col-stage-qualified" class="space-y-3 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Proposal -->
+          <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col min-w-[240px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+                <span class="text-xs font-bold text-slate-200">Proposal</span>
+              </div>
+              <span id="count-stage-proposal" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-teal-400">0</span>
+            </div>
+            <div id="col-stage-proposal" class="space-y-3 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Negotiation -->
+          <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col min-w-[240px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="text-xs font-bold text-slate-200">Negotiation</span>
+              </div>
+              <span id="count-stage-negotiation" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-amber-400">0</span>
+            </div>
+            <div id="col-stage-negotiation" class="space-y-3 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Closed Won -->
+          <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col min-w-[240px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-bold text-slate-200">Closed Won</span>
+              </div>
+              <span id="count-stage-won" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-emerald-400">0</span>
+            </div>
+            <div id="col-stage-won" class="space-y-3 flex-1 min-h-[300px]"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. ACCOUNTS & QUOTAS ================= -->
+      <section id="tab-accounts" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Accounts & Customer Tier Quota Monitor</h2>
+            <p class="text-xs text-slate-400">Automated tracking of client seats, API bandwidth, and storage limits.</p>
+          </div>
+          <button onclick="openNewAccountModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            Add Account
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900/80 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+                <tr>
+                  <th class="px-5 py-3">Account & Domain</th>
+                  <th class="px-4 py-3">Tier</th>
+                  <th class="px-4 py-3">MRR</th>
+                  <th class="px-4 py-3">Health</th>
+                  <th class="px-4 py-3">Seat Quota</th>
+                  <th class="px-4 py-3">API Quota</th>
+                  <th class="px-4 py-3">Storage Quota</th>
+                  <th class="px-4 py-3">Capacity Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamically populated accounts -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. SYSTEM SIZER & STRESS LAB ================= -->
+      <section id="tab-infrastructure" class="space-y-8 hidden">
+        <div>
+          <h2 class="text-lg font-bold text-white">System Infrastructure Capacity Sizer & Live Load Lab</h2>
+          <p class="text-xs text-slate-400">Architectural capacity planner: calculate hardware, database sharding, IOPS, and run live rate-limiting stress tests.</p>
+        </div>
+
+        <!-- Calculator Form + Output -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Sizing Inputs -->
+          <div class="lg:col-span-5 glass-card rounded-2xl p-6 space-y-5">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+              Operational Volume Parameters
+            </h3>
+
+            <!-- Parameter 1: Sales Reps -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-300 mb-1">
+                <span>Active Sales Reps (Concurrent Users)</span>
+                <span id="lbl-reps" class="font-mono text-cyan-400 font-bold">50</span>
+              </div>
+              <input type="range" id="input-reps" min="5" max="1000" step="5" value="50" oninput="runInfrastructureSizing()" class="w-full accent-cyan-400 cursor-pointer">
+            </div>
+
+            <!-- Parameter 2: Inbound Leads/Day -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-300 mb-1">
+                <span>Inbound Leads Ingestion / Day</span>
+                <span id="lbl-leads" class="font-mono text-cyan-400 font-bold">2,500</span>
+              </div>
+              <input type="range" id="input-leads" min="200" max="50000" step="200" value="2500" oninput="runInfrastructureSizing()" class="w-full accent-cyan-400 cursor-pointer">
+            </div>
+
+            <!-- Parameter 3: API Integrations -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-300 mb-1">
+                <span>Active Webhook / API Integrations</span>
+                <span id="lbl-integrations" class="font-mono text-cyan-400 font-bold">8</span>
+              </div>
+              <input type="range" id="input-integrations" min="1" max="40" step="1" value="8" oninput="runInfrastructureSizing()" class="w-full accent-cyan-400 cursor-pointer">
+            </div>
+
+            <!-- Parameter 4: Data Retention Years -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-300 mb-1">
+                <span>Audit & Record Retention (Years)</span>
+                <span id="lbl-retention" class="font-mono text-cyan-400 font-bold">3 Years</span>
+              </div>
+              <input type="range" id="input-retention" min="1" max="7" step="1" value="3" oninput="runInfrastructureSizing()" class="w-full accent-cyan-400 cursor-pointer">
+            </div>
+
+            <!-- Parameter 5: Peak Multiplier -->
+            <div>
+              <div class="flex justify-between text-xs text-slate-300 mb-1">
+                <span>Peak Burst Multiplier</span>
+                <span id="lbl-multiplier" class="font-mono text-cyan-400 font-bold">3.5x</span>
+              </div>
+              <input type="range" id="input-multiplier" min="1.5" max="6.0" step="0.5" value="3.5" oninput="runInfrastructureSizing()" class="w-full accent-cyan-400 cursor-pointer">
+            </div>
+
+            <div class="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-xl text-[11px] text-cyan-200 leading-relaxed">
+              Calculates database I/O, cache working sets, stream partitions, and hardware compute footprints based on production SLA formulas.
+            </div>
+          </div>
+
+          <!-- Sizing Output Summary Cards -->
+          <div class="lg:col-span-7 space-y-4">
+            <!-- Hardware Spec Card -->
+            <div class="glass-card rounded-2xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-white">Recommended Architecture Specifications</h3>
+                <span id="sizing-sharding-badge" class="text-xs px-2.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md font-medium">Read Replicas</span>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Peak QPS</span>
+                  <div id="out-peak-qps" class="text-xl font-bold text-white mt-1">0</div>
+                  <span class="text-[10px] text-slate-500">Queries / sec</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Total IOPS Req.</span>
+                  <div id="out-total-iops" class="text-xl font-bold text-white mt-1">0</div>
+                  <span class="text-[10px] text-slate-500">Read & Write IOPS</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">DB Storage (Multi-Yr)</span>
+                  <div id="out-storage-gb" class="text-xl font-bold text-white mt-1">0 GB</div>
+                  <span class="text-[10px] text-slate-500">Index + WAL + Data</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Redis Cache RAM</span>
+                  <div id="out-redis-ram" class="text-xl font-bold text-teal-300 mt-1">0 GB</div>
+                  <span class="text-[10px] text-slate-500">Hot Working Set</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Compute Nodes</span>
+                  <div id="out-compute-nodes" class="text-xl font-bold text-indigo-300 mt-1">0 Pods</div>
+                  <span class="text-[10px] text-slate-500">c6i.xlarge (4 vCPU)</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Est. Monthly Cloud</span>
+                  <div id="out-cloud-cost" class="text-xl font-bold text-emerald-400 mt-1">$0</div>
+                  <span class="text-[10px] text-slate-500">AWS / GCP Bill</span>
+                </div>
+              </div>
+
+              <!-- Sharding Architecture Detail -->
+              <div class="mt-4 p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-xs">
+                <span class="text-slate-400 font-medium">Recommended Topology: </span>
+                <span id="out-topology-text" class="text-slate-200"></span>
+              </div>
+            </div>
+
+            <!-- Cost Breakdown Mini Table -->
+            <div class="glass-card rounded-2xl p-5">
+              <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Infrastructure Cost Breakdown (USD / Mo)</h4>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <span class="text-slate-400 text-[11px]">Database (RDS/Aurora)</span>
+                  <div id="cost-db" class="text-sm font-semibold text-white mt-1">$0</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <span class="text-slate-400 text-[11px]">Compute Containers</span>
+                  <div id="cost-compute" class="text-sm font-semibold text-white mt-1">$0</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <span class="text-slate-400 text-[11px]">Redis & Caching</span>
+                  <div id="cost-redis" class="text-sm font-semibold text-white mt-1">$0</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <span class="text-slate-400 text-[11px]">Kafka Queue & Logs</span>
+                  <div id="cost-queue" class="text-sm font-semibold text-white mt-1">$0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE LOAD & BACKPRESSURE STRESS TEST LAB -->
+        <div class="glass-card rounded-2xl p-6 border-t-2 border-t-indigo-500">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Live Token Bucket Stress & Concurrency Lab
+              </h3>
+              <p class="text-xs text-slate-400">Trigger high-velocity synthetic event surges into the live backend to verify queuing, rate-limiting, and backpressure behavior.</p>
+            </div>
+            <button id="btn-run-stress" onclick="runLiveStressTest()" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-teal-500 hover:from-indigo-500 hover:to-teal-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>Dispatch 500-Event Surge</span>
+            </button>
+          </div>
+
+          <!-- Stress Test Output Metrics -->
+          <div id="stress-results-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">Events Sent</span>
+              <div id="stress-sent" class="text-lg font-bold text-white mt-1">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">Processed</span>
+              <div id="stress-processed" class="text-lg font-bold text-emerald-400 mt-1">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">Throttled (429)</span>
+              <div id="stress-throttled" class="text-lg font-bold text-rose-400 mt-1">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">p50 Latency</span>
+              <div id="stress-p50" class="text-lg font-bold text-indigo-300 mt-1">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">p99 Latency</span>
+              <div id="stress-p99" class="text-lg font-bold text-amber-300 mt-1">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-medium">Throughput</span>
+              <div id="stress-eps" class="text-lg font-bold text-teal-300 mt-1">-</div>
+            </div>
+          </div>
+
+          <!-- Status Alert -->
+          <div id="stress-status-banner" class="hidden p-3.5 rounded-xl text-xs font-medium flex items-center gap-2">
+            <!-- Dynamic message -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. CAPACITY ALERTS ================= -->
+      <section id="tab-alerts" class="space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white">Capacity Incident & Threshold Alerts</h2>
+            <p class="text-xs text-slate-400">Autonomous notifications triggered by rep workload saturation and customer quota breaches.</p>
+          </div>
+        </div>
+
+        <div id="alerts-container" class="space-y-3">
+          <!-- Dynamically populated alerts -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= MODAL: ADD DEAL ================= -->
+  <div id="modal-deal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white">Create New Opportunity</h3>
+        <button onclick="closeModal('modal-deal')" class="text-slate-400 hover:text-white text-lg">&times;</button>
+      </div>
+
+      <form id="form-add-deal" onsubmit="submitNewDeal(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1">Deal Title</label>
+          <input type="text" id="deal-input-name" required placeholder="e.g. Acme Enterprise AI Suite" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Account</label>
+            <select id="deal-select-account" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Deal Value ($ USD)</label>
+            <input type="number" id="deal-input-amount" min="1000" step="500" value="50000" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Pipeline Stage</label>
+            <select id="deal-select-stage" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <option value="Lead">Lead (20%)</option>
+              <option value="Qualified">Qualified (40%)</option>
+              <option value="Proposal">Proposal (60%)</option>
+              <option value="Negotiation">Negotiation (80%)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Effort / Capacity Points (1-5)</label>
+            <select id="deal-select-effort" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <option value="1">1 pt - Minor Addon</option>
+              <option value="2">2 pts - Standard SMB Deal</option>
+              <option value="3" selected>3 pts - Mid-Market Deal</option>
+              <option value="4">4 pts - Multi-Dept Enterprise</option>
+              <option value="5">5 pts - High-Complexity Strategic</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1">Assigned Sales Rep</label>
+          <select id="deal-select-rep" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+            <option value="">⚡ Auto-Assign (Smart Capacity Matching)</option>
+            <!-- Dynamically populated reps -->
+          </select>
+          <p class="text-[11px] text-teal-400/90 mt-1">If set to Auto-Assign, the capacity engine assigns the rep with highest available headroom.</p>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-deal')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold">Save Deal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD ACCOUNT ================= -->
+  <div id="modal-account" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white">Provision New Client Account</h3>
+        <button onclick="closeModal('modal-account')" class="text-slate-400 hover:text-white text-lg">&times;</button>
+      </div>
+
+      <form id="form-add-account" onsubmit="submitNewAccount(event)" class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Account Name</label>
+            <input type="text" id="acc-input-name" required placeholder="e.g. Apex Biotech" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Domain</label>
+            <input type="text" id="acc-input-domain" required placeholder="apexbiotech.com" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Tier</label>
+            <select id="acc-select-tier" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="Startup">Startup ($750 MRR)</option>
+              <option value="SMB">SMB ($2,500 MRR)</option>
+              <option value="Mid-Market" selected>Mid-Market ($6,500 MRR)</option>
+              <option value="Enterprise">Enterprise ($25,000 MRR)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Monthly MRR ($ USD)</label>
+            <input type="number" id="acc-input-mrr" value="6500" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Seat Limit</label>
+            <input type="number" id="acc-input-seats" value="30" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">API Calls / Mo</label>
+            <input type="number" id="acc-input-api" value="250000" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Storage Limit (GB)</label>
+            <input type="number" id="acc-input-storage" value="150" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-account')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold">Provision Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
